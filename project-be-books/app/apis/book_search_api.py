@@ -1,9 +1,12 @@
-from django.http import HttpResponseBadRequest
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import serializers
 
 from app.services.book_service import BookService
+
+
+class BookSearchParams(serializers.Serializer):
+    q = serializers.CharField(required=True)
 
 
 class BookAuthorSerializer(serializers.Serializer):
@@ -18,12 +21,10 @@ class BookSerializer(serializers.Serializer):
 
 class BookSearchApi(APIView):
     def get(self, request):
-        search_query = self.request.query_params.get("q")
+        params = BookSearchParams(data=self.request.query_params)
+        params.is_valid(raise_exception=True)
 
-        if not search_query:
-            return HttpResponseBadRequest()
-
-        books = BookService.search_book(query=search_query)
+        books = BookService.search_book(query=params.validated_data["q"])
         book_serializer = BookSerializer(books, many=True)
 
         return Response(data=book_serializer.data)
