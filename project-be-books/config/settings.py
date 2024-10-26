@@ -12,14 +12,23 @@ ALLOWED_HOSTS = ["*"]
 
 WSGI_APPLICATION = "config.wsgi.application"
 ROOT_URLCONF = "config.urls"
+STATIC_URL = "static/"
 
 # Apps
 
 INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
+    "django.contrib.staticfiles",
     "rest_framework",
     "app.config.Config",
+]
+
+# Django middlewares
+
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "django.middleware.common.CommonMiddleware",
 ]
 
 # REST framework
@@ -32,8 +41,6 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.JSONRenderer",
         "rest_framework.renderers.BrowsableAPIRenderer",
     ],
-    "DEFAULT_AUTHENTICATION_CLASSES": [],
-    "DEFAULT_PERMISSION_CLASSES": [],
 }
 
 # Database
@@ -49,3 +56,21 @@ DATABASES = {
         "PORT": "5432",
     }
 }
+
+# Django templates
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]
