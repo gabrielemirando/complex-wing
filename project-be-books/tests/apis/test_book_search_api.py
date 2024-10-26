@@ -4,14 +4,13 @@ import responses
 
 from rest_framework import status
 from rest_framework.test import APITestCase
-from rest_framework.reverse import reverse
 
 from tests.services.mock_gutenedex_api import MockGutendexApi
 
 
 class BookSearchApiTestCase(APITestCase):
     def test_return_400_if_search_query_param_is_missing(self):
-        response = self.client.get(reverse("book_search"))
+        response = self.client.get("/search")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -56,10 +55,7 @@ class BookSearchApiTestCase(APITestCase):
             ],
         )
 
-        response = self.client.get(
-            reverse("book_search"),
-            query_params={"q": "Frankenstein"},
-        )
+        response = self.client.get("/search?q=Frankenstein")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
