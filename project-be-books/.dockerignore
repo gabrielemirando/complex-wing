@@ -1,0 +1,9 @@
+.venv/
+.git
+.gitignore
+.DS_Store
+scripts/
+postgres/
+docker-compose.yml
+README.md
+*.iml
