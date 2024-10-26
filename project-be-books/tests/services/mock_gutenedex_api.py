@@ -33,9 +33,9 @@ class MockGutendexApi:
     @staticmethod
     def mock_get_book_detail(
         book_id: int,
-        title: str,
-        authors: list[dict],
-        subjects: list[str],
+        title: str = "",
+        authors: list[dict] = None,
+        subjects: list[str] = None,
         status_code=200,
     ) -> None:
         responses.add(
@@ -45,8 +45,8 @@ class MockGutendexApi:
             json={
                 "id": book_id,
                 "title": title,
-                "authors": authors,
-                "subjects": subjects,
+                "authors": authors or [],
+                "subjects": subjects or [],
                 "translators": [],
                 "bookshelves": [],
                 "languages": [],
@@ -55,6 +55,18 @@ class MockGutendexApi:
                 "formats": {},
                 "download_count": 1,
             },
+        )
+
+    @staticmethod
+    def mock_get_missing_book_detail(
+        book_id: int,
+        status_code=404,
+    ) -> None:
+        responses.add(
+            responses.GET,
+            f"http://gutendex.com/books/{book_id}",
+            status=status_code,
+            json={"detail": "No Book matches the given query."},
         )
 
     @staticmethod
