@@ -1,6 +1,7 @@
 from django.urls import path
 
 from app.apis.book_search_api import BookSearchApi
+from app.apis.review_api import ReviewApi
 from app.apis.review_create_api import ReviewCreateApi
 
 urlpatterns = [
@@ -13,5 +14,10 @@ urlpatterns = [
         "review",
         view=ReviewCreateApi.as_view(),
         name="review_create",
+    ),
+    path(
+        "review/<uuid:id>",
+        view=ReviewApi.as_view(),
+        name="review",
     ),
 ]

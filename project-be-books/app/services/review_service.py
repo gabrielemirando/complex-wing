@@ -1,3 +1,5 @@
+from django.shortcuts import get_object_or_404
+
 from app.models.review import Review
 from app.services.book_service import BookService, BookDetail
 
@@ -5,7 +7,7 @@ from app.services.book_service import BookService, BookDetail
 class ReviewService:
     @staticmethod
     def get_review(id: int) -> Review:
-        return Review.objects.get(id=id)
+        return get_object_or_404(Review, id=id)
 
     @staticmethod
     def create_review(id: str, data: dict) -> None:
@@ -26,8 +28,12 @@ class ReviewService:
 
     @staticmethod
     def update_review(id: int, data: dict) -> None:
-        return None
+        review = get_object_or_404(Review, id=id)
+        review.score = data.get("score", review.score)
+        review.content = data.get("review", review.content)
+        review.save()
 
     @staticmethod
     def delete_review(id: int) -> None:
-        return None
+        review = get_object_or_404(Review, id=id)
+        review.delete()
