@@ -20,7 +20,7 @@ class BookSerializer(serializers.Serializer):
 
 
 class BookSearchApi(APIView):
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         params = BookSearchParams(data=self.request.query_params)
         params.is_valid(raise_exception=True)
 

@@ -9,7 +9,7 @@ from app.models.review import Review
 from tests.services.mock_gutenedex_api import MockGutendexApi
 
 
-class BookSearchApiTestCase(APITestCase):
+class ReviewCreateApiTestCase(APITestCase):
     @responses.activate
     def test_return_400_if_book_id_does_not_exist(self):
         MockGutendexApi.mock_get_missing_book_detail(book_id=1)

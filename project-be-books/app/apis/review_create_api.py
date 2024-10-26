@@ -20,7 +20,7 @@ class ReviewCreateData(serializers.Serializer):
 
 
 class ReviewCreateApi(APIView):
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         data = ReviewCreateData(data=request.data)
         data.is_valid(raise_exception=True)
 
