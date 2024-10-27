@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework import serializers
 
 from app.services.book_service import BookService
-from app.services.review_service import ReviewService
+from app.tasks import create_review_async
 
 
 class ReviewCreateData(serializers.Serializer):
@@ -25,6 +25,9 @@ class ReviewCreateApi(APIView):
         data.is_valid(raise_exception=True)
 
         review_id = str(uuid.uuid4())
-        ReviewService.create_review(id=review_id, data=data.validated_data)
+        create_review_async.apply_async(
+            kwargs={"id": review_id, "data": data.validated_data},
+            task_id=review_id,
+        )
 
         return Response({"id": review_id})

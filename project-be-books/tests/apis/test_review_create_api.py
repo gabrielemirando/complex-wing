@@ -1,6 +1,7 @@
 import json
 
 import responses
+from django.test import override_settings
 
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -61,6 +62,12 @@ class ReviewCreateApiTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     @responses.activate
+    @override_settings(
+        task_eager_propagates=True,
+        task_always_eager=True,
+        broker_url="memory://",
+        backend="memory",
+    )
     def test_create_review_successfully(self):
         MockGutendexApi.mock_get_book_detail(
             book_id=1,

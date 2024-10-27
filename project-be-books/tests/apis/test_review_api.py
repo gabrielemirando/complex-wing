@@ -8,10 +8,10 @@ from tests.models.review_builder import ReviewBuilder
 
 
 class ReviewGetApiTestCase(APITestCase):
-    def test_return_404_if_review_does_not_exists(self):
+    def test_return_202_if_review_is_processing(self):
         response = self.client.get(f"/review/{ReviewBuilder.default_id}")
 
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
     def test_get_review(self):
         (

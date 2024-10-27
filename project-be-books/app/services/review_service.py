@@ -6,8 +6,8 @@ from app.services.book_service import BookService, BookDetail, EmptyBookDetail
 
 class ReviewService:
     @staticmethod
-    def get_review(id: int) -> Review:
-        return get_object_or_404(Review, id=id)
+    def get_review(id: str) -> Review:
+        return Review.objects.get(id=id)
 
     @staticmethod
     def create_review(id: str, data: dict) -> None:
