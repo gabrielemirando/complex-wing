@@ -99,7 +99,4 @@ class ReviewCreateApiTestCase(APITestCase):
         self.assertEqual(review.book_authors, [{"name": "Mary Shelley"}])
         self.assertEqual(review.book_subjects, ["Dr Frankenstein", "Monster"])
 
-        self.assertEqual(
-            {"id": str(review.id)},
-            json.loads(response.content),
-        )
+        self.assertEqual(str(review.id), json.loads(response.content))

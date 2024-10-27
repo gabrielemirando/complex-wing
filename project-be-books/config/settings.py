@@ -13,14 +13,13 @@ ALLOWED_HOSTS = ["*"]
 
 WSGI_APPLICATION = "config.wsgi.application"
 ROOT_URLCONF = "config.urls"
-STATIC_URL = "static/"
 
 # Apps
 
 INSTALLED_APPS = [
-    "django.contrib.staticfiles",
     "rest_framework",
     "app.config.Config",
+    "drf_spectacular",
 ]
 
 # Django middlewares
@@ -36,12 +35,12 @@ REST_FRAMEWORK = {
     "UNAUTHENTICATED_USER": None,
     "DEFAULT_PERMISSION_CLASSES": [],
     "DEFAULT_AUTHENTICATION_CLASSES": [],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PARSER_CLASSES": [
         "rest_framework.parsers.JSONParser",
     ],
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
-        "rest_framework.renderers.BrowsableAPIRenderer",
     ],
 }
 
@@ -80,3 +79,12 @@ TEMPLATES = [
         },
     },
 ]
+
+# Docs
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Book Service API",
+    "DESCRIPTION": "API for posting reviews and ratings of books",
+    "VERSION": "0.1.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}

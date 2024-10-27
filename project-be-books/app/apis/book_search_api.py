@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import serializers
@@ -20,6 +21,11 @@ class BookSerializer(serializers.Serializer):
 
 
 class BookSearchApi(APIView):
+    @extend_schema(
+        summary="Search for books",
+        parameters=[BookSearchParams],
+        responses=BookSerializer,
+    )
     def get(self, request, *args, **kwargs):
         params = BookSearchParams(data=self.request.query_params)
         params.is_valid(raise_exception=True)

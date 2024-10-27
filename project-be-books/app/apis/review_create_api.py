@@ -1,5 +1,6 @@
 import uuid
 
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import serializers
@@ -20,6 +21,14 @@ class ReviewCreateData(serializers.Serializer):
 
 
 class ReviewCreateApi(APIView):
+    @extend_schema(
+        summary="Create review asynchronously",
+        request=ReviewCreateData,
+        responses=OpenApiResponse(
+            response=str,
+            description="Review ID",
+        ),
+    )
     def post(self, request, *args, **kwargs):
         data = ReviewCreateData(data=request.data)
         data.is_valid(raise_exception=True)
@@ -30,4 +39,4 @@ class ReviewCreateApi(APIView):
             task_id=review_id,
         )
 
-        return Response({"id": review_id})
+        return Response(review_id)
