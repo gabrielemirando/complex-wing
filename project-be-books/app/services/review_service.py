@@ -21,8 +21,8 @@ class ReviewService:
 
         Review.objects.create(
             id=id,
+            review=data["review"],
             score=data["score"],
-            content=data["review"],
             book_id=book_id,
             book_title=book_data["title"],
             book_authors=book_data["authors"],
@@ -33,7 +33,7 @@ class ReviewService:
     def update_review(id: str, data: dict) -> None:
         review = get_object_or_404(Review, id=id)
         review.score = data.get("score", review.score)
-        review.content = data.get("review", review.content)
+        review.review = data.get("review", review.review)
         review.save()
 
     @staticmethod

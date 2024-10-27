@@ -18,7 +18,7 @@ class ReviewGetApiTestCase(APITestCase):
             ReviewBuilder()
             .with_id(ReviewBuilder.default_id)
             .with_score(8)
-            .with_content("Nice")
+            .with_review("Nice")
             .with_book_id(84)
             .with_book_title("The Great Gatsby")
             .with_book_authors([{"name": "F. Scott Fitzgerald"}])
@@ -33,8 +33,8 @@ class ReviewGetApiTestCase(APITestCase):
         review = json.loads(response.content)
 
         self.assertEqual(review["id"], ReviewBuilder.default_id)
+        self.assertEqual(review["review"], "Nice")
         self.assertEqual(review["score"], 8)
-        self.assertEqual(review["content"], "Nice")
         self.assertEqual(review["book_id"], 84)
         self.assertEqual(review["book_title"], "The Great Gatsby")
         self.assertEqual(review["book_authors"], [{"name": "F. Scott Fitzgerald"}])
@@ -64,7 +64,7 @@ class ReviewUpdateApiTestCase(APITestCase):
             ReviewBuilder()
             .with_id(ReviewBuilder.default_id)
             .with_score(8)
-            .with_content("Not nice")
+            .with_review("Not nice")
             .build()
         )
 
@@ -79,7 +79,7 @@ class ReviewUpdateApiTestCase(APITestCase):
         review = Review.objects.get(id=ReviewBuilder.default_id)
 
         self.assertEqual(review.score, 8)
-        self.assertEqual(review.content, "Nice")
+        self.assertEqual(review.review, "Nice")
 
 
 class ReviewDeleteApiTestCase(APITestCase):

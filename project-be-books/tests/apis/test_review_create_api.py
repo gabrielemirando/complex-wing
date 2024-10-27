@@ -93,7 +93,7 @@ class ReviewCreateApiTestCase(APITestCase):
         review = Review.objects.first()
         self.assertIsNotNone(review.id)
         self.assertEqual(review.score, 5)
-        self.assertEqual(review.content, "Good book!")
+        self.assertEqual(review.review, "Good book!")
         self.assertEqual(review.book_id, 1)
         self.assertEqual(review.book_title, "Frankenstein")
         self.assertEqual(review.book_authors, [{"name": "Mary Shelley"}])

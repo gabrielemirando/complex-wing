@@ -8,8 +8,8 @@ class ReviewBuilder:
 
     def __init__(self):
         self.id = self.default_id
+        self.review = ""
         self.score = 5
-        self.content = ""
         self.book_id = 1
         self.book_title = ""
         self.book_authors = []
@@ -19,12 +19,12 @@ class ReviewBuilder:
         self.id = value
         return self
 
-    def with_score(self, value: int) -> Self:
-        self.score = value
+    def with_review(self, value: str) -> Self:
+        self.review = value
         return self
 
-    def with_content(self, value: str) -> Self:
-        self.content = value
+    def with_score(self, value: int) -> Self:
+        self.score = value
         return self
 
     def with_book_id(self, value: int) -> Self:
@@ -46,8 +46,8 @@ class ReviewBuilder:
     def build(self) -> Review:
         return Review.objects.create(
             id=self.id,
+            review=self.review,
             score=self.score,
-            content=self.content,
             book_id=self.book_id,
             book_title=self.book_title,
             book_authors=self.book_authors,
