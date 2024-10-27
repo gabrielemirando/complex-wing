@@ -2,8 +2,7 @@
 .git
 .gitignore
 .DS_Store
-scripts/
-postgres/
 docker-compose.yml
+Dockerfile
 README.md
 *.iml

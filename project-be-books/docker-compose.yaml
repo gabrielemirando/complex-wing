@@ -1,23 +1,53 @@
 services:
 
-#  book-service:
-#    container_name: book-service
-#    build: .
-#    command: "poetry run python ./manage.py runserver 0.0.0.0:8000"
-#    ports:
-#      - "8000:8000"
-#    depends_on:
-#      - db
+  book-service:
+    container_name: book-service
+    build: .
+    command: >
+      sh -c "poetry run python manage.py migrate
+      && poetry run python manage.py runserver 0.0.0.0:8000"
+    environment:
+      - DB_NAME=bookdb
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/usr/src/app
+    depends_on:
+      - redis
+      - db
+
+  book-worker:
+    container_name: book-worker
+    build: .
+    command: "poetry run celery -A config worker -l INFO"
+    environment:
+      - DB_NAME=bookdb
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    volumes:
+      - ./app:/usr/src/app
+    depends_on:
+      - book-service
+      - redis
+      - db
 
   db:
     container_name: db
     image: postgres:17-alpine
-    volumes:
-      - ./postgres:/var/lib/postgresql/data/
     environment:
+      - POSTGRES_DB=bookdb
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=bookdb
     ports:
       - "5432:5432"
 
