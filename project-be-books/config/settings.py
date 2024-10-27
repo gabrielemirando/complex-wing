@@ -45,7 +45,6 @@ REST_FRAMEWORK = {
 
 # Database
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -56,6 +55,11 @@ DATABASES = {
         "PORT": "5432",
     }
 }
+
+# Celery configuration
+
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
 
 # Django templates
 
