@@ -18,8 +18,6 @@ STATIC_URL = "static/"
 # Apps
 
 INSTALLED_APPS = [
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
     "django.contrib.staticfiles",
     "rest_framework",
     "app.config.Config",
@@ -35,6 +33,9 @@ MIDDLEWARE = [
 # REST framework
 
 REST_FRAMEWORK = {
+    "UNAUTHENTICATED_USER": None,
+    "DEFAULT_PERMISSION_CLASSES": [],
+    "DEFAULT_AUTHENTICATION_CLASSES": [],
     "DEFAULT_PARSER_CLASSES": [
         "rest_framework.parsers.JSONParser",
     ],
@@ -75,8 +76,6 @@ TEMPLATES = [
             "context_processors": [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
