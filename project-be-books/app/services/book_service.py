@@ -12,6 +12,14 @@ class BookDetail(TypedDict):
     subjects: list[str]
 
 
+EmptyBookDetail = BookDetail(
+    id=0,
+    title="",
+    authors=[],
+    subjects=[],
+)
+
+
 class BookService:
     endpoint = "http://gutendex.com/books"
 
