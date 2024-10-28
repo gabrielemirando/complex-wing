@@ -12,6 +12,8 @@ class BookSearchParams(serializers.Serializer):
 
 class BookAuthorSerializer(serializers.Serializer):
     name = serializers.CharField()
+    birth_year = serializers.IntegerField(required=False)
+    death_year = serializers.IntegerField(required=False)
 
 
 class BookSerializer(serializers.Serializer):

@@ -9,7 +9,7 @@ from app.services.book_service import BookService
 from app.tasks import create_review_async
 
 
-class ReviewCreateData(serializers.Serializer):
+class ReviewCreateSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True)
     review = serializers.CharField(required=True, max_length=500)
     score = serializers.IntegerField(required=True, min_value=1, max_value=10)
@@ -22,15 +22,15 @@ class ReviewCreateData(serializers.Serializer):
 
 class ReviewCreateApi(APIView):
     @extend_schema(
-        summary="Create review asynchronously",
-        request=ReviewCreateData,
+        summary="Create review",
+        request=ReviewCreateSerializer,
         responses=OpenApiResponse(
             response=str,
             description="Review ID",
         ),
     )
     def post(self, request, *args, **kwargs):
-        data = ReviewCreateData(data=request.data)
+        data = ReviewCreateSerializer(data=request.data)
         data.is_valid(raise_exception=True)
 
         review_id = str(uuid.uuid4())

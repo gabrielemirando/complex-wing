@@ -64,14 +64,28 @@ class BookSearchApiTestCase(APITestCase):
                 {
                     "id": 1,
                     "title": "Frankenstein",
-                    "authors": [{"name": "Mary Shelley"}],
+                    "authors": [
+                        {
+                            "name": "Mary Shelley",
+                            "birth_year": 1797,
+                            "death_year": 1851,
+                        }
+                    ],
                 },
                 {
                     "id": 2,
                     "title": "Frankenstein 2",
                     "authors": [
-                        {"name": "Mary Shelley"},
-                        {"name": "Piero Angela"},
+                        {
+                            "name": "Mary Shelley",
+                            "birth_year": 1797,
+                            "death_year": 1851,
+                        },
+                        {
+                            "name": "Piero Angela",
+                            "birth_year": 1920,
+                            "death_year": 2020,
+                        },
                     ],
                 },
             ],

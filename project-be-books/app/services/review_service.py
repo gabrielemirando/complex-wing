@@ -1,16 +1,21 @@
-from django.shortcuts import get_object_or_404
-
 from app.models.review import Review
 from app.services.book_service import BookService, BookDetail, EmptyBookDetail
 
 
-class ReviewService:
-    @staticmethod
-    def get_review(id: str) -> Review:
-        return Review.objects.get(id=id)
+class ReviewNotFoundException(Exception):
+    pass
 
-    @staticmethod
-    def create_review(id: str, data: dict) -> None:
+
+class ReviewService:
+    @classmethod
+    def get_review(cls, id: str) -> Review:
+        try:
+            return Review.objects.get(id=id)
+        except Review.DoesNotExist:
+            raise ReviewNotFoundException
+
+    @classmethod
+    def create_review(cls, id: str, data: dict) -> None:
         book_id = data["id"]
         book_data: BookDetail
 
@@ -29,14 +34,14 @@ class ReviewService:
             book_subjects=book_data["subjects"],
         )
 
-    @staticmethod
-    def update_review(id: str, data: dict) -> None:
-        review = get_object_or_404(Review, id=id)
+    @classmethod
+    def update_review(cls, id: str, data: dict) -> None:
+        review = cls.get_review(id)
         review.score = data.get("score", review.score)
         review.review = data.get("review", review.review)
         review.save()
 
-    @staticmethod
-    def delete_review(id: str) -> None:
-        review = get_object_or_404(Review, id=id)
+    @classmethod
+    def delete_review(cls, id: str) -> None:
+        review = cls.get_review(id)
         review.delete()
