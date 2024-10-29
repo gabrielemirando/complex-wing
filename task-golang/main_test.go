@@ -5,10 +5,21 @@ import (
 	"testing"
 )
 
+/*
+	I have defined a MockWorker that does nothing in his work method, since
+	the goal is testing the behavior of MeasuredWorker.
+*/
+
+type MockWorker struct {
+}
+
+func (s *MockWorker) Work() {
+}
+
 func TestCounter(t *testing.T) {
 
 	t.Run("processing 3 times brings the counter to 3", func(t *testing.T) {
-		mw := &MeasuredWorker{Worker: &SlowWorker{}}
+		mw := &MeasuredWorker{Worker: &MockWorker{}}
 
 		mw.Work()
 		mw.Work()
@@ -19,7 +30,7 @@ func TestCounter(t *testing.T) {
 
 	t.Run("concurrent processing and counting", func(t *testing.T) {
 		wantedCount := 1000
-		mw := &MeasuredWorker{Worker: &SlowWorker{}}
+		mw := &MeasuredWorker{Worker: &MockWorker{}}
 
 		var wg sync.WaitGroup
 		wg.Add(wantedCount)
