@@ -1,47 +1,61 @@
+import uuid
+
+from django.core.cache import cache
+
 from app.models.review import Review
-from app.services.book_service import BookService, BookDetail, EmptyBookDetail
+from app.services.book_service import BookDetail
 
 
-class ReviewNotFoundException(Exception):
+class ReviewStillProcessing(Exception):
+    pass
+
+
+class ReviewNotFound(Exception):
     pass
 
 
 class ReviewService:
-    @classmethod
-    def get_review(cls, id: str) -> Review:
-        try:
-            return Review.objects.get(id=id)
-        except Review.DoesNotExist:
-            raise ReviewNotFoundException
+    def __init__(self, id: str):
+        self.id = id
 
-    @classmethod
-    def create_review(cls, id: str, data: dict) -> None:
-        book_id = data["id"]
-        book_data: BookDetail
+    @staticmethod
+    def generate_id_for_processing() -> str:
+        new_id = str(uuid.uuid4())
+        cache.add(new_id, True)
+        return new_id
 
-        try:
-            book_data = BookService.get_book_detail(book_id)
-        except Exception:
-            book_data = EmptyBookDetail
+    def is_processing(self) -> bool:
+        return cache.get(self.id, False)
 
+    def remove_from_processing(self) -> None:
+        cache.delete(self.id)
+
+    def create(self, create_data: dict, book_data: BookDetail) -> None:
         Review.objects.create(
-            id=id,
-            review=data["review"],
-            score=data["score"],
-            book_id=book_id,
+            id=self.id,
+            review=create_data["review"],
+            score=create_data["score"],
+            book_id=create_data["id"],
             book_title=book_data["title"],
             book_authors=book_data["authors"],
             book_subjects=book_data["subjects"],
         )
 
-    @classmethod
-    def update_review(cls, id: str, data: dict) -> None:
-        review = cls.get_review(id)
-        review.score = data.get("score", review.score)
-        review.review = data.get("review", review.review)
+    def get(self) -> Review:
+        try:
+            return Review.objects.get(id=self.id)
+        except Review.DoesNotExist:
+            if self.is_processing():
+                raise ReviewStillProcessing()
+            else:
+                raise ReviewNotFound()
+
+    def update(self, update_data: dict) -> None:
+        review = self.get()
+        review.score = update_data.get("score", review.score)
+        review.review = update_data.get("review", review.review)
         review.save()
 
-    @classmethod
-    def delete_review(cls, id: str) -> None:
-        review = cls.get_review(id)
+    def delete(self) -> None:
+        review = self.get()
         review.delete()

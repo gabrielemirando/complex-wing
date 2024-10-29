@@ -1,12 +1,11 @@
-import uuid
-
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import serializers
 
 from app.services.book_service import BookService
-from app.tasks import create_review_async
+from app.services.review_service import ReviewService
+from app.tasks import create_review
 
 
 class ReviewCreateSerializer(serializers.Serializer):
@@ -15,7 +14,7 @@ class ReviewCreateSerializer(serializers.Serializer):
     score = serializers.IntegerField(required=True, min_value=1, max_value=10)
 
     def validate_id(self, value):
-        if not BookService.is_valid_book(id=value):
+        if not BookService().is_book_valid(id=value):
             raise serializers.ValidationError()
         return value
 
@@ -33,10 +32,7 @@ class ReviewCreateApi(APIView):
         data = ReviewCreateSerializer(data=request.data)
         data.is_valid(raise_exception=True)
 
-        review_id = str(uuid.uuid4())
-        create_review_async.apply_async(
-            kwargs={"id": review_id, "data": data.validated_data},
-            task_id=review_id,
-        )
+        review_id = ReviewService.generate_id_for_processing()
+        create_review.delay(id=review_id, create_data=data.validated_data)
 
         return Response(review_id)

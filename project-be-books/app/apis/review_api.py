@@ -1,4 +1,3 @@
-from django.http import Http404
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -6,8 +5,11 @@ from rest_framework import serializers
 
 from app.apis.book_search_api import BookAuthorSerializer
 from app.models import Review
-from app.services.review_service import ReviewService, ReviewNotFoundException
-from app.tasks import is_create_review_pending
+from app.services.review_service import (
+    ReviewService,
+    ReviewNotFound,
+    ReviewStillProcessing,
+)
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -29,45 +31,56 @@ class ReviewApi(APIView):
         summary="Get review",
         responses={
             200: ReviewSerializer,
-            202: OpenApiResponse(description="Still processing"),
+            202: OpenApiResponse(description="Processing"),
+            404: OpenApiResponse(description="Not found"),
         },
     )
     def get(self, request, *args, **kwargs):
-        review_id = str(kwargs["id"])
+        review_service = self._get_review_service(**kwargs)
 
         try:
-            review = ReviewService.get_review(id=review_id)
-            serializer = ReviewSerializer(review)
-            return Response(serializer.data)
-        except ReviewNotFoundException:
-            status_code = 202 if is_create_review_pending(review_id) else 404
-            return Response(status=status_code)
+            review = review_service.get()
+            return Response(ReviewSerializer(review).data)
+        except ReviewStillProcessing:
+            return Response(status=202)
+        except ReviewNotFound:
+            return Response(status=404)
 
     @extend_schema(
         summary="Update review or score",
         request=ReviewUpdateSerializer,
-        responses=OpenApiResponse(str, description="ok"),
+        responses={
+            200: OpenApiResponse(str, description="ok"),
+            404: OpenApiResponse(description="Not found"),
+        },
     )
     def put(self, request, *args, **kwargs):
-        data = ReviewUpdateSerializer(data=request.data)
-        data.is_valid(raise_exception=True)
+        update_data = ReviewUpdateSerializer(data=request.data)
+        update_data.is_valid(raise_exception=True)
+
+        review_service = self._get_review_service(**kwargs)
 
         try:
-            ReviewService.update_review(
-                id=kwargs["id"],
-                data=data.validated_data,
-            )
+            review_service.update(update_data.validated_data)
             return Response("ok")
-        except ReviewNotFoundException:
-            raise Http404()
+        except (ReviewNotFound, ReviewStillProcessing):
+            return Response(status=404)
 
     @extend_schema(
         summary="Delete review",
-        responses=OpenApiResponse(str, description="ok"),
+        responses={
+            200: OpenApiResponse(str, description="ok"),
+            404: OpenApiResponse(description="Not found"),
+        },
     )
     def delete(self, request, *args, **kwargs):
+        review_service = self._get_review_service(**kwargs)
+
         try:
-            ReviewService.delete_review(id=kwargs["id"])
+            review_service.delete()
             return Response("ok")
-        except ReviewNotFoundException:
-            raise Http404()
+        except (ReviewNotFound, ReviewStillProcessing):
+            return Response(status=404)
+
+    def _get_review_service(self, **kwargs) -> ReviewService:
+        return ReviewService(str(kwargs["id"]))

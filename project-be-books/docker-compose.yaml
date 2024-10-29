@@ -1,3 +1,17 @@
+x-service-environment: &service-environment
+  DB_NAME: bookdb
+  DB_USER: user
+  DB_PASSWORD: password
+  DB_HOST: db
+  DB_PORT: 5432
+  REDIS_HOST: redis
+  REDIS_PORT: 6379
+  RABBITMQ_USER: user
+  RABBITMQ_PASSWORD: password
+  RABBITMQ_HOST: rabbitmq
+  RABBITMQ_PORT: 5672
+  RABBITMQ_VHOST: vhost
+
 services:
 
   book-service:
@@ -7,39 +21,29 @@ services:
       sh -c "poetry run python manage.py migrate
       && poetry run python manage.py runserver 0.0.0.0:8000"
     environment:
-      - DB_NAME=bookdb
-      - DB_USER=user
-      - DB_PASSWORD=password
-      - DB_HOST=db
-      - DB_PORT=5432
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      <<: *service-environment
     ports:
       - "8000:8000"
     volumes:
       - ./app:/usr/src/app
     depends_on:
-      - redis
       - db
+      - redis
+      - rabbitmq
 
   book-worker:
     container_name: book-worker
     build: .
     command: "poetry run celery -A config worker -l INFO"
     environment:
-      - DB_NAME=bookdb
-      - DB_USER=user
-      - DB_PASSWORD=password
-      - DB_HOST=db
-      - DB_PORT=5432
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      <<: *service-environment
     volumes:
       - ./app:/usr/src/app
     depends_on:
-      - book-service
-      - redis
       - db
+      - redis
+      - rabbitmq
+      - book-service
 
   db:
     container_name: db
@@ -50,6 +54,17 @@ services:
       - POSTGRES_PASSWORD=password
     ports:
       - "5432:5432"
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management-alpine
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+      - RABBITMQ_DEFAULT_VHOST=vhost
+    ports:
+      - "5672:5672"
+      - "15672:15672"
 
   redis:
     container_name: redis

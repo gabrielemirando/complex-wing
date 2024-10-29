@@ -2,16 +2,25 @@ import json
 
 from rest_framework import status
 from rest_framework.test import APITestCase
+from django.core.cache import cache
 
 from app.models import Review
 from tests.models.review_builder import ReviewBuilder
+from tests.utils import ClearCacheMixin
 
 
-class ReviewGetApiTestCase(APITestCase):
+class ReviewGetApiTestCase(ClearCacheMixin, APITestCase):
     def test_return_202_if_review_is_processing(self):
+        cache.add(ReviewBuilder.default_id, True)
+
         response = self.client.get(f"/review/{ReviewBuilder.default_id}")
 
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+
+    def test_return_404_if_review_is_not_found(self):
+        response = self.client.get(f"/review/{ReviewBuilder.default_id}")
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_review(self):
         (
@@ -54,6 +63,15 @@ class ReviewUpdateApiTestCase(APITestCase):
         response = self.client.put(
             f"/review/{ReviewBuilder.default_id}",
             data={"score": 800},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_return_400_if_review_is_too_long(self):
+        response = self.client.put(
+            f"/review/{ReviewBuilder.default_id}",
+            data={"review": "Nice" * 800},
             format="json",
         )
 

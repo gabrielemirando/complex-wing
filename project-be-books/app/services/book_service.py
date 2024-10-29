@@ -1,8 +1,8 @@
+from typing import TypedDict
+
 import requests
 
 from requests.models import Response
-
-from typing import TypedDict
 
 
 class BookDetail(TypedDict):
@@ -12,30 +12,21 @@ class BookDetail(TypedDict):
     subjects: list[str]
 
 
-EmptyBookDetail = BookDetail(
-    id=0,
-    title="",
-    authors=[],
-    subjects=[],
-)
-
-
 class BookService:
-    endpoint = "http://gutendex.com/books"
+    def __init__(self, endpoint: str = "http://gutendex.com/books"):
+        self.endpoint = endpoint
 
-    @classmethod
-    def search_book(cls, query: str) -> list[BookDetail]:
-        response = requests.get(BookService.endpoint, params={"search": query})
+    def search_book(self, query: str) -> list[BookDetail]:
+        response = requests.get(self.endpoint, params={"search": query})
         return response.json()["results"]
 
-    @classmethod
-    def is_valid_book(cls, id: int) -> bool:
-        return cls._get_book_detail_response(id).status_code == 200
+    def is_book_valid(self, id: int) -> bool:
+        response = self._get_book_detail_response(id)
+        return response.status_code == 200
 
-    @classmethod
-    def get_book_detail(cls, id: int) -> BookDetail:
-        return cls._get_book_detail_response(id).json()
+    def get_book_detail(self, id: int) -> BookDetail:
+        response = self._get_book_detail_response(id)
+        return response.json()
 
-    @classmethod
-    def _get_book_detail_response(cls, id: int) -> Response:
-        return requests.get(f"{cls.endpoint}/{id}")
+    def _get_book_detail_response(self, id: int) -> Response:
+        return requests.get(f"{self.endpoint}/{id}")

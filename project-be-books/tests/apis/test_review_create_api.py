@@ -1,16 +1,16 @@
 import json
 
 import responses
-from django.test import override_settings
 
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from app.models.review import Review
 from tests.services.mock_gutenedex_api import MockGutendexApi
+from tests.utils import ClearCacheMixin
 
 
-class ReviewCreateApiTestCase(APITestCase):
+class ReviewCreateApiTestCase(ClearCacheMixin, APITestCase):
     @responses.activate
     def test_return_400_if_book_id_does_not_exist(self):
         MockGutendexApi.mock_get_missing_book_detail(book_id=1)
@@ -62,13 +62,7 @@ class ReviewCreateApiTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     @responses.activate
-    @override_settings(
-        task_eager_propagates=True,
-        task_always_eager=True,
-        broker_url="memory://",
-        backend="memory",
-    )
-    def test_create_review_successfully(self):
+    def test_create_review(self):
         MockGutendexApi.mock_get_book_detail(
             book_id=1,
             title="Frankenstein",

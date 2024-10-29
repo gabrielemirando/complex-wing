@@ -1,13 +1,16 @@
 from celery.app import shared_task
-from celery.result import AsyncResult
 
+from app.services.book_service import BookService
 from app.services.review_service import ReviewService
 
 
 @shared_task()
-def create_review_async(id: str, data: dict) -> None:
-    ReviewService.create_review(id=id, data=data)
+def create_review(id: str, create_data: dict) -> None:
+    book_service = BookService()
+    review_service = ReviewService(id)
 
-
-def is_create_review_pending(id: str) -> bool:
-    return not AsyncResult(id).ready()
+    try:
+        book_data = book_service.get_book_detail(create_data["id"])
+        review_service.create(create_data, book_data)
+    finally:
+        review_service.remove_from_processing()

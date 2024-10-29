@@ -1,5 +1,7 @@
 import os
+import sys
 from pathlib import Path
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -22,7 +24,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
 ]
 
-# Django middlewares
+# Middlewares
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -57,14 +59,41 @@ DATABASES = {
     }
 }
 
-# Celery configuration
+# Cache
 
 REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
 REDIS_PORT = os.environ.get("REDIS_PORT", 6379)
-CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}"
-CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}"
 
-# Django templates
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}",
+        "TIMEOUT": None,
+    }
+}
+
+# Celery
+
+RABBITMQ_USER = os.environ.get("RABBITMQ_USER", "user")
+RABBITMQ_PASSWORD = os.environ.get("RABBITMQ_PASSWORD", "password")
+RABBITMQ_HOST = os.environ.get("RABBITMQ_HOST", "localhost")
+RABBITMQ_PORT = os.environ.get("RABBITMQ_PORT", 5672)
+RABBITMQ_VHOST = os.environ.get("RABBITMQ_VHOST", "vhost")
+
+CELERY_BROKER_URL = (
+    f"amqp://{RABBITMQ_USER}:{RABBITMQ_PASSWORD}"
+    f"@{RABBITMQ_HOST}:{RABBITMQ_PORT}/{RABBITMQ_VHOST}"
+)
+CELERY_TASK_IGNORE_RESULT = True
+
+# API Docs
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Book Service API",
+    "DESCRIPTION": "API for posting reviews and ratings of books",
+    "VERSION": "0.1.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}
 
 TEMPLATES = [
     {
@@ -80,11 +109,20 @@ TEMPLATES = [
     },
 ]
 
-# Docs
+# Testing overrides
 
-SPECTACULAR_SETTINGS = {
-    "TITLE": "Book Service API",
-    "DESCRIPTION": "API for posting reviews and ratings of books",
-    "VERSION": "0.1.0",
-    "SERVE_INCLUDE_SCHEMA": False,
-}
+IS_TEST = "test" in sys.argv or "test_coverage" in sys.argv
+
+if IS_TEST:
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": os.environ.get("DB_NAME", "bookdb"),
+    }
+
+    CACHES["default"] = {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+    }
+
+    CELERY_BROKER_URL = "memory://"
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True

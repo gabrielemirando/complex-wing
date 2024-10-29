@@ -32,7 +32,7 @@ class BookSearchApi(APIView):
         params = BookSearchParams(data=self.request.query_params)
         params.is_valid(raise_exception=True)
 
-        books = BookService.search_book(query=params.validated_data["q"])
+        books = BookService().search_book(query=params.validated_data["q"])
         book_serializer = BookSerializer(books, many=True)
 
         return Response(data=book_serializer.data)
